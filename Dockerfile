@@ -10,11 +10,11 @@ COPY ./requirements.txt /app/requirements.txt
 
 WORKDIR /python_guesswho_api
 
-RUN pip install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
 COPY . /python_guesswho_api
 
-ENTRYPOINT [ "python" ]
+ENTRYPOINT [ "python3" ]
 
 CMD [ "app.py" ]
 
