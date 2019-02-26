@@ -65,7 +65,7 @@ def get_user_service(limit):
 
     # Database connection and data according to Query
     db_obj = user_ops.get_db_obj()
-    query = "SELECT * FROM igw.usertest where UserEmailId = '%s' LIMIT "+limit
+    query = "SELECT * FROM mytest.usertest where UserEmailId = '%s' LIMIT "+limit
     query = query %user_email_id
     print(query)
     results = db_obj.db_select_query(query)
@@ -96,7 +96,7 @@ def add_user_score():
     incorrect_answer_count = str(req_obj['InCorrectAnswersCount'])
 
     """
-    INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
+    INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
     VALUES ('mangesh.khude@infobeans.com',60,'2019-02-19 00:00:00',60,10,6,4)
     """
     if user_email_id is None:
@@ -156,7 +156,7 @@ def add_user_score():
         }
         return jsonify(empty_incorrect_answer)
 
-    query = "INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
+    query = "INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
             "VALUES ('" + user_email_id + "','" + reward_points + "','" + test_date + "'," + test_duration + ","\
             + question_count + "," + correct_answer_count + "," + incorrect_answer_count + ")"
     print(query)
@@ -178,17 +178,24 @@ def add_user_score():
 @app.route('/GetTopScore/', methods=['POST'])
 def get_top_score():
     req_obj = request.get_json()
-    print(req_obj)
 
     user_email_id = req_obj['UserEmailID']
     user_token = req_obj['UserToken']
     is_current_score = str(req_obj['IsCurrentScore'])
 
     """
-    SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY RewardPoints DESC LIMIT 1, 1
+    SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1, 1
     """
-
-    return jsonify(req_obj)
+    query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`= '"+user_email_id+"' ORDER BY `CorrectAnswersCount` DESC LIMIT 1, 1"
+    print(query)
+    db_obj = user_ops.get_db_obj()
+    results = db_obj.db_select_query(query)
+    print(results)
+    result_json = jsonify(results)
+    result_json['UserToken'] = user_token
+    result_json['IsCurrentScore'] = is_current_score
+    print(result_json)
+    return result_json
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
