@@ -10,7 +10,7 @@ users_seen = {}
 
 
 @app.route('/api/user/GetUserResults/<limit>', methods=['POST'])
-def get_user_service(limit):
+def get_user_controller(limit):
     req_obj = request.get_json()
     print(req_obj)
 
@@ -65,9 +65,8 @@ def get_user_service(limit):
 
     # Database connection and data according to Query
     db_obj = user_ops.get_db_obj()
-    query = "SELECT * FROM mytest.usertest where UserEmailId = '%s' LIMIT "+limit
+    query = "SELECT * FROM igw.usertest where UserEmailId = '%s' LIMIT "+limit
     query = query %user_email_id
-    print(query)
     results = db_obj.db_select_query(query)
 
     # Transform python object back into json
@@ -80,9 +79,9 @@ def get_user_service(limit):
     return jsonify(output_json)
 
 
-# http://172.16.20.87:5000/AddUserScore/
-@app.route('/api/user/AddUserScore/', methods=['POST'])
-def add_user_score():
+# http://172.16.20.87:5000/AddUserResult/
+@app.route('/api/user/AddUserScore', methods=['POST'])
+def add_user_score_controller():
     req_obj = request.get_json()
     print(req_obj)
 
@@ -96,7 +95,7 @@ def add_user_score():
     incorrect_answer_count = str(req_obj['InCorrectAnswersCount'])
 
     """
-    INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
+    INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
     VALUES ('mangesh.khude@infobeans.com',60,'2019-02-19 00:00:00',60,10,6,4)
     """
     if user_email_id is None:
@@ -156,7 +155,7 @@ def add_user_score():
         }
         return jsonify(empty_incorrect_answer)
 
-    query = "INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
+    query = "INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
             "VALUES ('" + user_email_id + "','" + reward_points + "','" + test_date + "'," + test_duration + ","\
             + question_count + "," + correct_answer_count + "," + incorrect_answer_count + ")"
     print(query)
@@ -174,6 +173,48 @@ def add_user_score():
         return jsonify(not_inserted_dict)
 
     return jsonify(inserted_dict)
+
+
+@app.route('/api/user/GetTopScore/', methods=['POST'])
+def get_top_score():
+    req_obj = request.get_json()
+    user_email_id = req_obj['UserEmailID']
+    user_token = req_obj['UserToken']
+    is_current_score = str(req_obj['IsCurrentScore'])
+
+    """
+    1. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1
+    2. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `TestID` DESC LIMIT 1
+    """
+    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest " \
+                        "where `UserEmailID`= '" + user_email_id + "' ORDER BY `CorrectAnswersCount` DESC LIMIT 1"
+    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest " \
+                          "where `UserEmailID`= '" + user_email_id + "' ORDER BY `TestID` DESC LIMIT 1"
+    if is_current_score == 'true':
+        db_obj = user_ops.get_db_obj()
+        best_of_all = db_obj.db_select_query(best_of_all_query)
+        current_score = db_obj.db_select_query(current_score_query)
+        best_of_all[0]['Status'] = "Success"
+        best_of_all[0]['Message'] = "Top score retrieved Successfully"
+        best_of_all[0]['UserToken'] = user_token
+        best_of_all[0]['IsCurrentScore'] = is_current_score
+        best_of_all[0]['UserScore'] = current_score[0]['CorrectAnswersCount']
+        best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
+        result_json = jsonify(best_of_all)
+        return result_json
+    elif is_current_score == 'false':
+        db_obj = user_ops.get_db_obj()
+        best_of_all = db_obj.db_select_query(best_of_all_query)
+        best_of_all[0]['Status'] = "Success"
+        best_of_all[0]['Message'] = "Top score retrieved Successfully"
+        best_of_all[0]['UserToken'] = user_token
+        best_of_all[0]['IsCurrentScore'] = is_current_score
+        best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
+        result_json = jsonify(best_of_all)
+        return result_json
+    else:
+        error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score of user"}
+        return jsonify(error_dict)
 
 
 if __name__ == '__main__':
