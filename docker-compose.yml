@@ -1,0 +1,13 @@
+version: '3'
+services:
+    guesswho_python_api:
+        container_name: guesswho_python_api
+        build:
+            context: '.'
+        image: guess-who-python-webservice:latest
+        ports:
+            - "5000:5000"
+        privileged: true
+        restart: always
+        extra_hosts:
+            - "infobeans.gitlab.com:49.248.12.179"
