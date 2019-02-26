@@ -6,7 +6,7 @@ RUN apt-get update -y && \
     apt-get install -y python3-pip python3-dev
 
 # We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
+COPY ./requirements.txt /python_guesswho_api/requirements.txt
 
 WORKDIR /python_guesswho_api
 
