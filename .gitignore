@@ -1,0 +1,25 @@
+dist
+.pydistutils.cfg
+.bash_history
+
+# ----------------------------------------------- IDE / Project / Package
+
+.idea/
+*.sublime-*
+*.DS_Store
+.project
+.pydevproject
+.settings/
+.Python
+.cache/
+local.ini
+
+*.egg
+*.egg-info
+*.eggs
+*.pyc
+*.swp
+*.swo
+*.exe
+*.pyc
+guesswho_virtual_env/
