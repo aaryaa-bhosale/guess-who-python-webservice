@@ -1,21 +1,20 @@
 FROM ubuntu:16.04
 
-LABEL maintainer="Aarya Bhosale <aaryaa.bhosale@infobeans.com>"
-ARG DEBIAN_FRONTEND=noninteractive
+MAINTAINER Your Name "aaryaa.bhosale@infobeans.com"
 
-USER root
+RUN apt-get update -y && \
+    apt-get install -y python3-pip python3-dev
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-        software-properties-common \
-        build-essential \
-        python-dev \
-        python-pip \
-        curl \
-        git \
-        python-setuptools \
-        sudo \
-        && rm -rf /var/lib/apt/lists/*
+# We copy just the requirements.txt first to leverage Docker cache
+COPY ./requirements.txt /app/requirements.txt
 
+WORKDIR /python_guesswho_api
 
-RUN  sudo pip install virtualenv
+RUN pip install -r requirements.txt
+
+COPY . /python_guesswho_api
+
+ENTRYPOINT [ "python" ]
+
+CMD [ "app.py" ]
 
