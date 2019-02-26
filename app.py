@@ -11,17 +11,63 @@ users_seen = {}
 
 @app.route('/GetUserService/<limit>', methods=['POST'])
 def get_user_service(limit):
-    error_dict = {"status": "success", "message": "No matching records"}
+    req_obj = request.get_json()
+    print(req_obj)
 
-    parser = reqparse.RequestParser()
-    parser.add_argument('UserEmailID')
-    parser.add_argument('UserToken')
-    parser.add_argument('NumberOfRecords')
-    args = parser.parse_args()
+    if not 'UserEmailID' in req_obj:
+        empty_user_email = {
+            'status': False,
+            'message': 'User Email-Id Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_user_email)
+    elif not 'UserToken' in req_obj:
+        empty_user_token = {
+            'status': False,
+            'message': 'Token Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_user_token)
+    if not 'NumberOfRecords' in req_obj:
+        empty_limit = {
+            'status': False,
+            'message': 'Limit Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_limit)
+    user_email_id = req_obj['UserEmailID']
+    user_token = req_obj['UserToken']
+    number_of_records = limit
+
+    if user_email_id == "" or user_email_id is None:
+        empty_user_email = {
+            'status': False,
+            'message': 'User Email-Id Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_user_email)
+    elif user_token == "" or user_token is None:
+        empty_user_token = {
+            'status': False,
+            'message': 'Token Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_user_token)
+    elif number_of_records == "" or number_of_records is None:
+        empty_limit = {
+            'status': False,
+            'message': 'Limit of records is  Missing',
+            'db-message': 'Data not inserted'
+        }
+        return jsonify(empty_limit)
+
+    error_dict = {"status": "success", "message": "No matching records"}
 
     # Database connection and data according to Query
     db_obj = user_ops.get_db_obj()
-    query = "SELECT * FROM mytest.usertest where UserEmailId = '%s'" % args['UserEmailID']
+    query = "SELECT * FROM igw.usertest where UserEmailId = '%s' LIMIT "+limit
+    query = query %user_email_id
+    print(query)
     results = db_obj.db_select_query(query)
 
     # Transform python object back into json
@@ -37,71 +83,72 @@ def get_user_service(limit):
 # http://172.16.20.87:5000/AddUserResult/
 @app.route('/AddUserScore/', methods=['POST'])
 def add_user_score():
-    parser = reqparse.RequestParser()
-    parser.add_argument('UserEmailID')
-    parser.add_argument('UserToken', type=str)
-    parser.add_argument('TestDuration', type=str)
-    parser.add_argument('QuestionsCount', type=str)
-    parser.add_argument('RewardPoints', type=str)
-    parser.add_argument('TestDate', type=str)
-    parser.add_argument('CorrectAnswersCount', type=str)
-    parser.add_argument('InCorrectAnswersCount', type=str)
+    req_obj = request.get_json()
+    print(req_obj)
 
-    args = parser.parse_args()
-    # """
-    # INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
-    # VALUES ('vaibhav.gade@infobeans.com',60,'2019-02-19 00:00:00',60,10,6,4)
-    # """
-    if args['UserEmailID'] is None:
+    user_email_id = req_obj['UserEmailID']
+    user_token = req_obj['UserToken']
+    test_duration = str(req_obj['TestDuration'])
+    question_count = str(req_obj['QuestionsCount'])
+    reward_points = str(req_obj['RewardPoints'])
+    test_date = req_obj['TestDate']
+    correct_answer_count = str(req_obj['CorrectAnswersCount'])
+    incorrect_answer_count = str(req_obj['InCorrectAnswersCount'])
+
+    """
+    INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
+    VALUES ('mangesh.khude@infobeans.com',60,'2019-02-19 00:00:00',60,10,6,4)
+    """
+    if user_email_id is None:
         empty_user_email = {
             'status': False,
             'message': 'User Email-Id Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_user_email)
-    elif args['UserToken'] is None:
+    elif user_token is None:
         empty_user_token = {
             'status': False,
             'message': 'Token Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_user_token)
-    elif args['TestDuration'] is None:
+    elif test_duration is None:
         empty_test_duration = {
             'status': False,
             'message': 'Test Duration Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_test_duration)
-    elif args['QuestionsCount'] is None:
+    elif question_count is None:
         empty_question_count = {
             'status': False,
             'message': 'Total Question Count Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_question_count)
-    elif args['RewardPoints'] is None:
+    elif reward_points is None:
         empty_reward_point = {
             'status': False,
             'message': 'Reward point Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_reward_point)
-    elif args['TestDate'] is None:
+    elif test_date is None:
         empty_test_date = {
             'status': False,
             'message': 'Test Date Missing',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_test_date)
-    elif args['CorrectAnswersCount'] is None:
+    elif correct_answer_count is None:
         empty_correct_ansewer = {
             'status': False,
             'message': 'Correct answer count Missing ',
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_correct_ansewer)
-    elif args['InCorrectAnswersCount'] is None:
+    elif incorrect_answer_count is None:
         empty_incorrect_answer = {
             'status': False,
             'message': 'Incorrect answer count Missing',
@@ -109,10 +156,9 @@ def add_user_score():
         }
         return jsonify(empty_incorrect_answer)
 
-    query = "INSERT INTO mytest.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
-            "VALUES ('" + args['UserEmailID'] + "','" + args['RewardPoints'] + "','" + args['TestDate'] + "'," + args[
-                'TestDuration'] + "," + args['QuestionsCount'] + "," + args['CorrectAnswersCount'] + "," + args[
-                'InCorrectAnswersCount'] + ")"
+    query = "INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
+            "VALUES ('" + user_email_id + "','" + reward_points + "','" + test_date + "'," + test_duration + ","\
+            + question_count + "," + correct_answer_count + "," + incorrect_answer_count + ")"
     print(query)
     db_obj = user_ops.get_db_obj()
     is_inserted = db_obj.db_commit_query(query)
@@ -129,6 +175,20 @@ def add_user_score():
 
     return jsonify(inserted_dict)
 
+@app.route('/GetTopScore/', methods=['POST'])
+def get_top_score():
+    req_obj = request.get_json()
+    print(req_obj)
+
+    user_email_id = req_obj['UserEmailID']
+    user_token = req_obj['UserToken']
+    is_current_score = str(req_obj['IsCurrentScore'])
+
+    """
+    SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY RewardPoints DESC LIMIT 1, 1
+    """
+
+    return jsonify(req_obj)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
