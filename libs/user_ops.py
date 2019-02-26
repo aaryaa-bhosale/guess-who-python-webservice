@@ -14,7 +14,7 @@ def get_db_obj():
     if db_obj:
         return db_obj
     db_obj = Database()
-    db_obj.connect_to_database(db_name="mytest")
+    db_obj.connect_to_database(db_name="igw")
     return db_obj
 
 
