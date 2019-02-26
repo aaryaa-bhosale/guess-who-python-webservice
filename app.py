@@ -9,7 +9,7 @@ app = Flask(__name__)
 users_seen = {}
 
 
-@app.route('/GetUserService/<limit>', methods=['POST'])
+@app.route('/api/user/GetUserResults/<limit>', methods=['POST'])
 def get_user_service(limit):
     req_obj = request.get_json()
     print(req_obj)
@@ -80,8 +80,8 @@ def get_user_service(limit):
     return jsonify(output_json)
 
 
-# http://172.16.20.87:5000/AddUserResult/
-@app.route('/AddUserScore/', methods=['POST'])
+# http://172.16.20.87:5000/AddUserScore/
+@app.route('/api/user/AddUserScore/', methods=['POST'])
 def add_user_score():
     req_obj = request.get_json()
     print(req_obj)
@@ -175,27 +175,6 @@ def add_user_score():
 
     return jsonify(inserted_dict)
 
-@app.route('/GetTopScore/', methods=['POST'])
-def get_top_score():
-    req_obj = request.get_json()
-
-    user_email_id = req_obj['UserEmailID']
-    user_token = req_obj['UserToken']
-    is_current_score = str(req_obj['IsCurrentScore'])
-
-    """
-    SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1, 1
-    """
-    query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`= '"+user_email_id+"' ORDER BY `CorrectAnswersCount` DESC LIMIT 1, 1"
-    print(query)
-    db_obj = user_ops.get_db_obj()
-    results = db_obj.db_select_query(query)
-    print(results)
-    result_json = jsonify(results)
-    result_json['UserToken'] = user_token
-    result_json['IsCurrentScore'] = is_current_score
-    print(result_json)
-    return result_json
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
