@@ -186,9 +186,9 @@ def get_top_score():
     1. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1
     2. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `TestID` DESC LIMIT 1
     """
-    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest " \
+    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest " \
                         "where `UserEmailID`= '" + user_email_id + "' ORDER BY `CorrectAnswersCount` DESC LIMIT 1"
-    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest " \
+    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest " \
                           "where `UserEmailID`= '" + user_email_id + "' ORDER BY `TestID` DESC LIMIT 1"
     if is_current_score == 'true':
         db_obj = user_ops.get_db_obj()
@@ -213,7 +213,7 @@ def get_top_score():
         result_json = jsonify(best_of_all)
         return result_json
     else:
-        error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score of user"}
+        error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score for the user"}
         return jsonify(error_dict)
 
 
