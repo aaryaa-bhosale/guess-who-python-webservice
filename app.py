@@ -66,7 +66,7 @@ def get_user_controller(limit):
 
     # Database connection and data according to Query
     db_obj = user_ops.get_db_obj()
-    query = "SELECT * FROM igw.usertest where UserEmailId = '%s' LIMIT "+limit
+    query = "SELECT * FROM score_db.`user_score` where UserEmailId = '%s' LIMIT "+limit
     query = query %user_email_id
     results = db_obj.db_select_query(query)
 
@@ -156,7 +156,7 @@ def add_user_score_controller():
         }
         return jsonify(empty_incorrect_answer)
 
-    query = "INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
+    query = "INSERT INTO score_db.`user_score`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)" \
             "VALUES ('" + user_email_id + "','" + reward_points + "','" + test_date + "'," + test_duration + ","\
             + question_count + "," + correct_answer_count + "," + incorrect_answer_count + ")"
     print(query)
@@ -187,9 +187,9 @@ def get_top_score():
     1. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1
     2. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `TestID` DESC LIMIT 1
     """
-    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest " \
+    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM score_db.`user_score` " \
                         "where `UserEmailID`= '" + user_email_id + "' ORDER BY `CorrectAnswersCount` DESC LIMIT 1"
-    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM igw.usertest " \
+    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM score_db.`user_score` " \
                           "where `UserEmailID`= '" + user_email_id + "' ORDER BY `TestID` DESC LIMIT 1"
     if is_current_score == 'true':
         db_obj = user_ops.get_db_obj()
