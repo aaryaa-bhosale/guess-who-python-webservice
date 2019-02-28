@@ -15,7 +15,7 @@ import pymysql.cursors
 
 logger = logging.getLogger(__name__)
 
-DB_SERVER = "192.168.2.81"
+DB_SERVER = "score_db"
 DB_USER = "guesswhouser"
 DB_PASSWORD = "Infoserver123"
 
