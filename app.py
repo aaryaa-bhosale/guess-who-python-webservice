@@ -10,7 +10,7 @@ app = Flask(__name__)
 users_seen = {}
 
 
-@app.route('/api/user/GetUserResults<limit>', methods=['POST'])
+@app.route('/api/user/GetUserResults/<limit>', methods=['POST'])
 def get_user_controller(limit):
     req_obj = request.get_json()
     print(req_obj)
@@ -66,7 +66,7 @@ def get_user_controller(limit):
 
     # Database connection and data according to Query
     db_obj = user_ops.get_db_obj()
-    query = "SELECT * FROM score_db.`user_score` where UserEmailId = '%s' LIMIT "+limit
+    query = "SELECT * FROM score_db.`user_score` where UserEmailId = '%s' LIMIT " +limit
     query = query %user_email_id
     results = db_obj.db_select_query(query)
 
