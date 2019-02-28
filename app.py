@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from flask_restful import reqparse
 import random
 import json
+import datetime as dt
 
 from libs import user_ops
 
@@ -9,7 +10,7 @@ app = Flask(__name__)
 users_seen = {}
 
 
-@app.route('/api/user/GetUserResults/<limit>', methods=['POST'])
+@app.route('/api/user/GetUserResults<limit>', methods=['POST'])
 def get_user_controller(limit):
     req_obj = request.get_json()
     print(req_obj)
@@ -69,14 +70,14 @@ def get_user_controller(limit):
     query = query %user_email_id
     results = db_obj.db_select_query(query)
 
-    # Transform python object back into json
-    output_json = json.dumps(results, default=str)
+    for i in results:
+        dt.datetime.strftime(results[0]['TestDate'], "%Y-%m-%dT%H:%M:%S")
 
     if not results:
         return jsonify(error_dict)
 
     # Show json
-    return jsonify(output_json)
+    return jsonify(results)
 
 
 # http://172.16.20.87:5000/AddUserResult/
