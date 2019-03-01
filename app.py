@@ -204,8 +204,9 @@ def get_top_score():
     user_email_id = req_obj['UserEmailID']
     user_token = req_obj['UserToken']
     is_current_score = str(req_obj['IsCurrentScore'])
-    
-    verified_token = validate_token(user_email_id, user_token)
+    auth_resp = validate_token(user_email_id, user_token)
+    print(auth_resp)
+    verified_token = auth_resp['token']
     if not verified_token == user_token:
         invalid_token = {
             'status': False,
@@ -221,28 +222,59 @@ def get_top_score():
                         "where `UserEmailID`= '" + user_email_id + "' ORDER BY `CorrectAnswersCount` DESC LIMIT 1"
     current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM score_db.`user_score` " \
                           "where `UserEmailID`= '" + user_email_id + "' ORDER BY `TestID` DESC LIMIT 1"
+    db_obj = user_ops.get_db_obj()
+    best_of_all = db_obj.db_select_query(best_of_all_query)
+    print("best_of_all")
+    print(best_of_all)
+    print(type(best_of_all))
+    current_score = db_obj.db_select_query(current_score_query)
+    print("current")
+    print(current_score)
+    print(type(current_score))
     if is_current_score == 'true':
-        db_obj = user_ops.get_db_obj()
-        best_of_all = db_obj.db_select_query(best_of_all_query)
-        current_score = db_obj.db_select_query(current_score_query)
-        best_of_all[0]['Status'] = "Success"
-        best_of_all[0]['Message'] = "Top score retrieved Successfully"
-        best_of_all[0]['UserToken'] = verified_token
-        best_of_all[0]['IsCurrentScore'] = is_current_score
-        best_of_all[0]['UserScore'] = current_score[0]['CorrectAnswersCount']
-        best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
-        result_json = jsonify(best_of_all)
-        return result_json
+        if not best_of_all:
+            best_of_all['Status'] = "Success"
+            best_of_all['Message'] = "User did not played any quiz(Fresh User)"
+            best_of_all['UserEmailID'] = auth_resp['emailID']
+            best_of_all['UserToken'] = auth_resp['token']
+            best_of_all['RewardPoints'] = 0
+            best_of_all['TestDate'] = ""
+            best_of_all['TestDuration'] = ""
+            best_of_all['QuestionsCount'] = 0
+            best_of_all['CorrectAnswersCount'] = 0
+            best_of_all['InCorrectAnswersCount'] = 0
+            result_json = jsonify(best_of_all)
+            return result_json
+        else:
+            best_of_all[0]['Status'] = "Success"
+            best_of_all[0]['Message'] = "Top score retrieved Successfully"
+            best_of_all[0]['UserToken'] = verified_token
+            best_of_all[0]['IsCurrentScore'] = is_current_score
+            best_of_all[0]['UserScore'] = current_score[0]['CorrectAnswersCount']
+            best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
+            result_json = jsonify(best_of_all)
+            return result_json
     elif is_current_score == 'false':
-        db_obj = user_ops.get_db_obj()
-        best_of_all = db_obj.db_select_query(best_of_all_query)
-        best_of_all[0]['Status'] = "Success"
-        best_of_all[0]['Message'] = "Top score retrieved Successfully"
-        best_of_all[0]['UserToken'] = verified_token
-        best_of_all[0]['IsCurrentScore'] = is_current_score
-        best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
-        result_json = jsonify(best_of_all)
-        return result_json
+        if not current_score:
+            current_score['Status'] = "Success"
+            current_score['Message'] = "User did not played any quiz(Fresh User)"
+            current_score['UserEmailID'] = auth_resp['emailID']
+            current_score['UserToken'] = auth_resp['token']
+            current_score['RewardPoints'] = 0
+            current_score['TestDate'] = ""
+            current_score['TestDuration'] = ""
+            current_score['QuestionsCount'] = 0
+            current_score['CorrectAnswersCount'] = 0
+            current_score['InCorrectAnswersCount'] = 0
+            current_score['BestScore'] = 0
+            result_json = jsonify(current_score)
+            return result_json
+        else:
+            current_score[0]['UserToken'] = verified_token
+            current_score[0]['IsCurrentScore'] = is_current_score
+            current_score[0]['BestScore'] = current_score[0]['CorrectAnswersCount']
+            result_json = jsonify(current_score)
+            return result_json
     else:
         error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score for the user"}
         return jsonify(error_dict)
@@ -259,7 +291,7 @@ def validate_token(email, token):
     #json_data = json.dumps(data_dict)
     resp = requests.post(url, json=data_dict, headers={'Content-Type':'application/json'})
     final_response = resp.json()
-    return final_response['user']['token']
+    return final_response['user']
 
 
 def generate_login_token(email):
