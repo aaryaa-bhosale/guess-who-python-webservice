@@ -242,6 +242,13 @@ def get_top_score():
         error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score for the user"}
         return jsonify(error_dict)
 
+def validate_token(email, token):
+    url = 'http://192.168.2.81:30848/api/login/auth'
+    data_dict = {"EmailID": str(email), "Token":str(token)}
+    print(data_dict)
+    resp = requests.post(url, json=data_dict, headers={'Content-Type':'application/json'})
+    final_response = resp.json()
+    return final_response['user']['token']
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
