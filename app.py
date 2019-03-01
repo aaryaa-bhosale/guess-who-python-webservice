@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+import requests
 from flask_restful import reqparse
 import random
 import json
 import datetime as dt
+import sys
 
 from libs import user_ops
 
@@ -13,8 +15,19 @@ users_seen = {}
 @app.route('/api/user/GetUserResults/<limit>', methods=['POST'])
 def get_user_controller(limit):
     req_obj = request.get_json()
-    print(req_obj)
-
+    
+    user_email_id = req_obj['UserEmailID']
+    user_token = req_obj['UserToken']
+    number_of_records = req_obj['NumberOfRecords']
+    
+    verified_token = validate_token(user_email_id, user_token)
+    if not verified_token == user_token :
+        invalid_token = {
+            'status': False,
+            'message': 'Invalid Token',
+        }
+        return jsonify(invalid_token)
+    
     if not 'UserEmailID' in req_obj:
         empty_user_email = {
             'status': False,
@@ -36,9 +49,6 @@ def get_user_controller(limit):
             'db-message': 'Data not inserted'
         }
         return jsonify(empty_limit)
-    user_email_id = req_obj['UserEmailID']
-    user_token = req_obj['UserToken']
-    number_of_records = limit
 
     if user_email_id == "" or user_email_id is None:
         empty_user_email = {
@@ -99,6 +109,13 @@ def add_user_score_controller():
     INSERT INTO igw.`usertest`(`UserEmailID`, `RewardPoints`, `TestDate`, `TestDuration`, `QuestionsCount`, `CorrectAnswersCount`, `InCorrectAnswersCount`)
     VALUES ('mangesh.khude@infobeans.com',60,'2019-02-19 00:00:00',60,10,6,4)
     """
+    verified_token = validate_token(user_email_id, user_token)
+    if not verified_token == user_token:
+        invalid_token = {
+            'status': False,
+            'message': 'Invalid Token',
+        }
+        return jsonify(invalid_token)
     if user_email_id is None:
         empty_user_email = {
             'status': False,
@@ -182,6 +199,14 @@ def get_top_score():
     user_email_id = req_obj['UserEmailID']
     user_token = req_obj['UserToken']
     is_current_score = str(req_obj['IsCurrentScore'])
+    
+    verified_token = validate_token(user_email_id, user_token)
+    if not verified_token == user_token:
+        invalid_token = {
+            'status': False,
+            'message': 'Invalid Token',
+        }
+        return jsonify(invalid_token)
 
     """
     1. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1
@@ -197,7 +222,7 @@ def get_top_score():
         current_score = db_obj.db_select_query(current_score_query)
         best_of_all[0]['Status'] = "Success"
         best_of_all[0]['Message'] = "Top score retrieved Successfully"
-        best_of_all[0]['UserToken'] = user_token
+        best_of_all[0]['UserToken'] = verified_token
         best_of_all[0]['IsCurrentScore'] = is_current_score
         best_of_all[0]['UserScore'] = current_score[0]['CorrectAnswersCount']
         best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
@@ -208,7 +233,7 @@ def get_top_score():
         best_of_all = db_obj.db_select_query(best_of_all_query)
         best_of_all[0]['Status'] = "Success"
         best_of_all[0]['Message'] = "Top score retrieved Successfully"
-        best_of_all[0]['UserToken'] = user_token
+        best_of_all[0]['UserToken'] = verified_token
         best_of_all[0]['IsCurrentScore'] = is_current_score
         best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
         result_json = jsonify(best_of_all)
