@@ -215,7 +215,7 @@ def get_top_score():
     2. select max(RewardPoints) from  score_db.user_score where UserEmailID='monika.agrawal@infobeans.com' group by UserEmailID
     3. RewardPoints from  score_db.user_score where UserEmailID='monika.agrawal@infobeans.com' order by TestID desc Limit 1
     """
-    overall_high_score_query = "select max(RewardPoints) as reward from  score_db.user_score group by UserEmailID  LIMIT 1"
+    overall_high_score_query = "select max(RewardPoints) as reward from  score_db.user_score"
     current_score_false_query = "select max(RewardPoints) as reward from  score_db.user_score where UserEmailID='"+user_email_id+"' group by UserEmailID"
     current_score_true_query = "select RewardPoints as reward from  score_db.user_score where UserEmailID='"+user_email_id+"' order by TestID desc Limit 1"
     db_obj = user_ops.get_db_obj()
