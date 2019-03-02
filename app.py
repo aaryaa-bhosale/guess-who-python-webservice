@@ -233,17 +233,18 @@ def get_top_score():
     print(type(current_score))
     if is_current_score == 'true':
         if not best_of_all:
-            best_of_all['Status'] = "Success"
-            best_of_all['Message'] = "User did not played any quiz(Fresh User)"
-            best_of_all['UserEmailID'] = auth_resp['emailID']
-            best_of_all['UserToken'] = auth_resp['token']
-            best_of_all['RewardPoints'] = 0
-            best_of_all['TestDate'] = ""
-            best_of_all['TestDuration'] = ""
-            best_of_all['QuestionsCount'] = 0
-            best_of_all['CorrectAnswersCount'] = 0
-            best_of_all['InCorrectAnswersCount'] = 0
-            result_json = jsonify(best_of_all)
+            new_data = {}
+            new_data['Status'] = "Success"
+            new_data['Message'] = "User did not played any quiz(Fresh User)"
+            new_data['UserEmailID'] = auth_resp['emailID']
+            new_data['UserToken'] = auth_resp['token']
+            new_data['RewardPoints'] = 0
+            new_data['TestDate'] = ""
+            new_data['TestDuration'] = ""
+            new_data['QuestionsCount'] = 0
+            new_data['CorrectAnswersCount'] = 0
+            new_data['InCorrectAnswersCount'] = 0
+            result_json = jsonify(new_data)
             return result_json
         else:
             best_of_all[0]['Status'] = "Success"
@@ -256,18 +257,19 @@ def get_top_score():
             return result_json
     elif is_current_score == 'false':
         if not current_score:
-            current_score['Status'] = "Success"
-            current_score['Message'] = "User did not played any quiz(Fresh User)"
-            current_score['UserEmailID'] = auth_resp['emailID']
-            current_score['UserToken'] = auth_resp['token']
-            current_score['RewardPoints'] = 0
-            current_score['TestDate'] = ""
-            current_score['TestDuration'] = ""
-            current_score['QuestionsCount'] = 0
-            current_score['CorrectAnswersCount'] = 0
-            current_score['InCorrectAnswersCount'] = 0
-            current_score['BestScore'] = 0
-            result_json = jsonify(current_score)
+            new_data = {}
+            new_data['Status'] = "Success"
+            new_data['Message'] = "User did not played any quiz(Fresh User)"
+            new_data['UserEmailID'] = auth_resp['emailID']
+            new_data['UserToken'] = auth_resp['token']
+            new_data['RewardPoints'] = 0
+            new_data['TestDate'] = ""
+            new_data['TestDuration'] = ""
+            new_data['QuestionsCount'] = 0
+            new_data['CorrectAnswersCount'] = 0
+            new_data['InCorrectAnswersCount'] = 0
+            new_data['BestScore'] = 0
+            result_json = jsonify(new_data)
             return result_json
         else:
             current_score[0]['UserToken'] = verified_token
