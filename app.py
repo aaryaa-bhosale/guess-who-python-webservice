@@ -215,67 +215,57 @@ def get_top_score():
         return jsonify(invalid_token)
 
     """
-    1. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `CorrectAnswersCount` DESC LIMIT 1
-    2. SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM mytest.usertest where `UserEmailID`='mangesh.khude@infobeans.com' ORDER BY `TestID` DESC LIMIT 1
+    1. select max(RewardPoints) from  score_db.user_score group by UserEmailID  LIMIT 1
+    2. select max(RewardPoints) from  score_db.user_score where UserEmailID='monika.agrawal@infobeans.com' group by UserEmailID
+    3. RewardPoints from  score_db.user_score where UserEmailID='monika.agrawal@infobeans.com' order by TestID desc Limit 1
     """
-    best_of_all_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM score_db.`user_score` " \
-                        "where `UserEmailID`= '" + user_email_id + "' ORDER BY `CorrectAnswersCount` DESC LIMIT 1"
-    current_score_query = "SELECT `UserEmailID`, `TestID`, `CorrectAnswersCount` FROM score_db.`user_score` " \
-                          "where `UserEmailID`= '" + user_email_id + "' ORDER BY `TestID` DESC LIMIT 1"
+    overall_high_score_query = "select max(RewardPoints) from  score_db.user_score group by UserEmailID  LIMIT 1"
+    current_score_false_query = "select max(RewardPoints) from  score_db.user_score where UserEmailID='"+user_email_id+"' group by UserEmailID"
+    current_score_true_query = "select RewardPoints from  score_db.user_score where UserEmailID='"+user_email_id+"' order by TestID desc Limit 1"
     db_obj = user_ops.get_db_obj()
-    best_of_all = db_obj.db_select_query(best_of_all_query)
-    print("best_of_all")
-    print(best_of_all)
-    print(type(best_of_all))
-    current_score = db_obj.db_select_query(current_score_query)
-    print("current")
-    print(current_score)
-    print(type(current_score))
+
+    overall_high_score = db_obj.db_select_query(overall_high_score_query)
+    current_score_false = db_obj.db_select_query(current_score_false_query)
+    current_score_true = db_obj.db_select_query(current_score_true_query)
     if is_current_score == 'true':
-        if not best_of_all:
-            new_data = {}
-            new_data['Status'] = "Success"
-            new_data['Message'] = "User did not played any quiz(Fresh User)"
-            new_data['UserEmailID'] = auth_resp['emailID']
-            new_data['UserToken'] = auth_resp['token']
-            new_data['RewardPoints'] = 0
-            new_data['TestDate'] = ""
-            new_data['TestDuration'] = ""
-            new_data['QuestionsCount'] = 0
-            new_data['CorrectAnswersCount'] = 0
-            new_data['InCorrectAnswersCount'] = 0
+        if not overall_high_score:
+            new_data = [{}]
+            new_data[0]['Status'] = "Success"
+            new_data[0]['Message'] = "User did not played any quiz(Fresh User)"
+            new_data[0]['UserEmailID'] = auth_resp['emailID']
+            new_data[0]['UserToken'] = auth_resp['token']
+            new_data[0]['OverallHighScore'] = 0
+            new_data[0]['YourScore'] = 0
+            if current_score_true:
+                new_data[0]['YourScore'] = current_score_true[0]['RewardPoints']
             result_json = jsonify(new_data)
             return result_json
         else:
-            best_of_all[0]['Status'] = "Success"
-            best_of_all[0]['Message'] = "Top score retrieved Successfully"
-            best_of_all[0]['UserToken'] = verified_token
-            best_of_all[0]['IsCurrentScore'] = is_current_score
-            best_of_all[0]['UserScore'] = current_score[0]['CorrectAnswersCount']
-            best_of_all[0]['BestScore'] = best_of_all[0]['CorrectAnswersCount']
-            result_json = jsonify(best_of_all)
+            overall_high_score[0]['Status'] = "Success"
+            overall_high_score[0]['Message'] = "Overall High Score retrieved Successfully"
+            overall_high_score[0]['OverallHighScore'] = overall_high_score[0]['max(RewardPoints)']
+            overall_high_score[0]['YourScore'] = 0
+            if current_score_true:
+                overall_high_score[0]['YourScore'] = current_score_true[0]['RewardPoints']
+            result_json = jsonify(overall_high_score)
             return result_json
     elif is_current_score == 'false':
-        if not current_score:
-            new_data = {}
-            new_data['Status'] = "Success"
-            new_data['Message'] = "User did not played any quiz(Fresh User)"
-            new_data['UserEmailID'] = auth_resp['emailID']
-            new_data['UserToken'] = auth_resp['token']
-            new_data['RewardPoints'] = 0
-            new_data['TestDate'] = ""
-            new_data['TestDuration'] = ""
-            new_data['QuestionsCount'] = 0
-            new_data['CorrectAnswersCount'] = 0
-            new_data['InCorrectAnswersCount'] = 0
-            new_data['BestScore'] = 0
+        if not current_score_false:
+            new_data = [{}]
+            new_data[0]['Status'] = "Success"
+            new_data[0]['Message'] = "User did not played any quiz(Fresh User)"
+            new_data[0]['UserEmailID'] = auth_resp['emailID']
+            new_data[0]['UserToken'] = auth_resp['token']
+            new_data[0]['OverallHighScore'] = 0
+            new_data[0]['YourScore'] = 0
             result_json = jsonify(new_data)
             return result_json
-        else:
-            current_score[0]['UserToken'] = verified_token
-            current_score[0]['IsCurrentScore'] = is_current_score
-            current_score[0]['BestScore'] = current_score[0]['CorrectAnswersCount']
-            result_json = jsonify(current_score)
+        elif current_score_false:
+            new_data = [{}]
+            new_data[0]['Status'] = "Success"
+            new_data[0]['OverallHighScore'] = overall_high_score[0]['max(RewardPoints)']
+            new_data[0]['YourScore'] = 0
+            result_json = jsonify(new_data)
             return result_json
     else:
         error_dict = {"Status": "Failure", "Message": "Failed to fetch Top score for the user"}
