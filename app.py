@@ -224,39 +224,35 @@ def get_top_score():
     current_score_false = db_obj.db_select_query(current_score_false_query)
     current_score_true = db_obj.db_select_query(current_score_true_query)
     if is_current_score == 'true':
-        if not overall_high_score:
-            new_data = [{}]
-            new_data[0]['Status'] = "Success"
-            new_data[0]['Message'] = "User did not played any quiz(Fresh User)"
-            new_data[0]['OverallHighScore'] = 0
-            new_data[0]['YourScore'] = 0
-            if current_score_true:
-                new_data[0]['YourScore'] = current_score_true[0]['reward']
-            result_json = jsonify(new_data)
-            return result_json
-        else:
             new_data = [{}]
             new_data[0]['Status'] = "Success"
             new_data[0]['Message'] = "Overall High Score retrieved Successfully"
-            new_data[0]['OverallHighScore'] = overall_high_score[0]['reward']
-            new_data[0]['YourScore'] = current_score_true[0]['reward']
+            if not overall_high_score:
+                new_data[0]['OverallHighScore'] = 0
+            else:
+                new_data[0]['OverallHighScore'] = overall_high_score[0]['reward']
+
+            if not current_score_true:
+                new_data[0]['YourScore'] = 0
+            else:
+                new_data[0]['YourScore'] = current_score_true[0]['reward']
+
             result_json = jsonify(new_data)
             return result_json
     elif is_current_score == 'false':
-        if not current_score_false:
-            new_data = [{}]
-            new_data[0]['Status'] = "Success"
-            new_data[0]['Message'] = "User did not played any quiz(Fresh User)"
-            new_data[0]['OverallHighScore'] = 0
-            new_data[0]['YourScore'] = 0
-            result_json = jsonify(new_data)
-            return result_json
-        else:
             new_data = [{}]
             new_data[0]['Status'] = "Success"
             new_data[0]['Message'] = "Overall High Score retrieved Successfully"
-            new_data[0]['OverallHighScore'] = overall_high_score[0]['reward']
-            new_data[0]['YourScore'] = current_score_false[0]['reward']
+
+            if not overall_high_score:
+                new_data[0]['OverallHighScore'] = 0
+            else:
+                new_data[0]['OverallHighScore'] = overall_high_score[0]['reward']
+
+            if not current_score_false:
+                new_data[0]['YourScore'] = 0
+            else:
+                new_data[0]['YourScore'] = current_score_false[0]['reward']
             result_json = jsonify(new_data)
             return result_json
     else:
